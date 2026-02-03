@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+
 import Navigation from './components/Navigation';
+import SearchBox from './components/SearchBox';
+import ErrorAlert from './components/ErrorAlert';
+import AnswerCard from './components/AnswerCard';
+import SourcesCard from './components/SourcesCard';
+import EmptyState from './components/EmptyState';
 
 type Source = {
   content: string;
@@ -11,7 +18,7 @@ type Source = {
   };
 };
 
-export default function Home() {
+export default function Index() {
   const [query, setQuery] = useState('');
   const [answer, setAnswer] = useState('');
   const [sources, setSources] = useState<Source[]>([]);
@@ -48,99 +55,57 @@ export default function Home() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      handleSearch();
-    }
-  };
-
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="mx-auto max-w-4xl p-8">
-        <h1 className="mb-6 text-3xl font-bold text-gray-900 dark:text-gray-100">
-          RAG Search
-        </h1>
+      {/* HERO SECTION */}
+      <section className="relative flex flex-col items-center px-6 pt-24 pb-20 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
+        >
+          Search your documents
+        </motion.h1>
 
-        {/* Search Box */}
-        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <textarea
-            rows={4}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask a question about your uploaded documents…"
-            className="w-full resize-none rounded-lg border border-gray-300 bg-white p-4 text-gray-900 shadow-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+        <motion.p
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="mt-4 max-w-2xl text-lg text-muted-foreground"
+        >
+          Ask questions and get AI-powered answers from your uploaded files
+        </motion.p>
+
+        {/* SEARCH CARD */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-12 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card"
+        >
+          <SearchBox
+            query={query}
+            onQueryChange={setQuery}
+            onSearch={handleSearch}
+            loading={loading}
           />
+        </motion.div>
+      </section>
 
-          <button
-            onClick={handleSearch}
-            disabled={loading || !query.trim()}
-            className="mt-4 rounded-lg bg-blue-600 px-8 py-3 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-          >
-            {loading ? 'Searching…' : 'Search'}
-          </button>
+      {/* RESULTS SECTION */}
+      <main className="mx-auto max-w-3xl px-6 pb-24">
+        <div className="space-y-6">
+          {error && <ErrorAlert message={error} />}
 
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Press <span className="font-medium">Cmd / Ctrl + Enter</span> to search
-          </p>
+          {answer && !error && <AnswerCard answer={answer} />}
+
+          {sources.length > 0 && <SourcesCard sources={sources} />}
+
+          {!loading && !answer && !error && <EmptyState />}
         </div>
-
-        {/* Error */}
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-red-800 dark:text-red-200">{error}</p>
-          </div>
-        )}
-
-        {/* Answer */}
-        {answer && !error && (
-          <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <h2 className="mb-3 text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Answer
-            </h2>
-            <p className="whitespace-pre-wrap leading-relaxed text-gray-800 dark:text-gray-200">
-              {answer}
-            </p>
-          </div>
-        )}
-
-        {/* Sources */}
-        {sources.length > 0 && (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Sources ({sources.length})
-            </h2>
-
-            <div className="space-y-3">
-              {sources.map((source, index) => (
-                <div
-                  key={index}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800"
-                >
-                  <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">Document:</span>{' '}
-                    {source.metadata?.file_name ||
-                      source.metadata?.source ||
-                      'Unknown'}
-                  </p>
-                  <p className="line-clamp-3 text-sm text-gray-800 dark:text-gray-200">
-                    {source.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!loading && !answer && !error && (
-          <div className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
-            Ask a question to search across your uploaded documents using
-            Gemini-powered RAG.
-          </div>
-        )}
       </main>
     </div>
   );

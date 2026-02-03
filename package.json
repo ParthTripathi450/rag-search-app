@@ -14,12 +14,19 @@
     "@langchain/core": "^1.0.6",
     "@langchain/google-genai": "^1.0.3",
     "@langchain/textsplitters": "^1.0.1",
+    "@radix-ui/react-slot": "^1.2.4",
     "@supabase/supabase-js": "^2.93.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.30.0",
+    "lucide-react": "^0.563.0",
     "mammoth": "^1.11.0",
     "next": "16.1.6",
     "pdf2json": "^4.0.2",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-router-dom": "^7.13.0",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

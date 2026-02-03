@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 
-
-
 import Navigation from '@/app/components/Navigation';
 import PDFViewerModal from '@/app/components/PDFViewerModal';
 import UploadModal from '@/app/components/UploadModal';
@@ -79,11 +77,12 @@ export default function DocumentsPage() {
   };
 
   const handleDelete = async (doc: Document) => {
-    const confirmed = confirm(
-      `Delete "${doc.file_name}"?\n\nThis will permanently remove the document, embeddings, and stored file.`
-    );
-
-    if (!confirmed) return;
+    if (
+      !confirm(
+        `Delete "${doc.file_name}"?\n\nThis will permanently remove the document and embeddings.`
+      )
+    )
+      return;
 
     setDeletingId(doc.id);
 
@@ -93,7 +92,6 @@ export default function DocumentsPage() {
       });
 
       const data = await res.json();
-
       if (!res.ok || data.error) {
         throw new Error(data.error || 'Delete failed');
       }
@@ -107,44 +105,53 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="mx-auto max-w-7xl p-8">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Documents
-          </h1>
+      {/* HERO */}
+      <section className="px-6 pt-16 pb-10 text-center">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground">
+          Documents
+        </h1>
+        <p className="mt-3 text-muted-foreground">
+          Manage and review your uploaded documents
+        </p>
+
+        <div className="mt-6 flex justify-center">
           <button
             onClick={() => setShowUploadModal(true)}
-            className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+            className="rounded-xl bg-primary px-5 py-2.5 font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             Upload Document
           </button>
         </div>
+      </section>
 
-        {/* States */}
+      {/* CONTENT */}
+      <main className="mx-auto max-w-7xl px-6 pb-24">
+        {/* Loading */}
         {loading && (
-          <div className="py-12 text-center text-gray-500 dark:text-gray-400">
+          <div className="py-16 text-center text-muted-foreground">
             Loading documents…
           </div>
         )}
 
+        {/* Error */}
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-red-800 dark:text-red-200">{error}</p>
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-destructive">
+            {error}
           </div>
         )}
 
+        {/* Empty state */}
         {!loading && !error && documents.length === 0 && (
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800">
-            <p className="mb-4 text-gray-500 dark:text-gray-400">
+          <div className="mt-12 rounded-2xl border border-border bg-card p-16 text-center shadow-sm">
+            <p className="mb-4 text-muted-foreground">
               No documents uploaded yet.
             </p>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+              className="font-medium text-primary hover:underline"
             >
               Upload your first document
             </button>
@@ -153,10 +160,10 @@ export default function DocumentsPage() {
 
         {/* Table */}
         {!loading && !error && documents.length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-secondary">
                   <tr>
                     {[
                       'File Name',
@@ -168,46 +175,47 @@ export default function DocumentsPage() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                        className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
                       >
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-900">
+
+                <tbody className="divide-y divide-border">
                   {documents.map((doc) => {
                     const isPDF = doc.file_name.toLowerCase().endsWith('.pdf');
 
                     return (
                       <tr
                         key={doc.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className="transition hover:bg-secondary/60"
                       >
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <td className="px-6 py-4 text-sm font-medium text-foreground">
                           {doc.file_name}
                         </td>
 
-                        <td className="px-6 py-4 text-sm">
-                          <span className="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        <td className="px-6 py-4">
+                          <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                             {doc.file_type || 'unknown'}
                           </span>
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
                           {formatFileSize(doc.file_size)}
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
                           {doc.total_chunks}
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
                           {formatDate(doc.upload_date)}
                         </td>
 
                         <td className="px-6 py-4 text-sm font-medium">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-4">
                             <button
                               onClick={() => {
                                 const url = doc.file_url
@@ -222,7 +230,7 @@ export default function DocumentsPage() {
                                 });
                                 setShowViewer(true);
                               }}
-                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                              className="text-primary hover:underline"
                             >
                               {isPDF ? 'Preview' : 'View'}
                             </button>
@@ -236,7 +244,7 @@ export default function DocumentsPage() {
                                 download={doc.file_name}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                                className="text-emerald-600 hover:underline"
                               >
                                 Download
                               </a>
@@ -245,7 +253,7 @@ export default function DocumentsPage() {
                             <button
                               onClick={() => handleDelete(doc)}
                               disabled={deletingId === doc.id}
-                              className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
+                              className="text-destructive hover:underline disabled:opacity-50"
                             >
                               {deletingId === doc.id ? 'Deleting…' : 'Delete'}
                             </button>
