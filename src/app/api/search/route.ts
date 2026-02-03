@@ -41,8 +41,8 @@ export async function POST(req: Request) {
       "match_documents",
       {
         query_embedding: queryEmbedding,
-        match_threshold: 0.2, // adjust for stricter/looser matching
-        match_count: 5,       // top 5 relevant chunks
+        match_threshold: 0.15, // adjust for stricter/looser matching
+        match_count: 15,       // top 5 relevant chunks
       }
     );
 
@@ -66,18 +66,28 @@ export async function POST(req: Request) {
       .join("\n\n---\n\n");
 
     // 4️⃣ Generate answer using Gemini
-    const response = await llm.invoke([
-      {
-        role: "system",
-        content:
-          "You are a helpful assistant. Answer ONLY using the provided context. " +
-          "If the answer cannot be found in the context, say you do not know.",
-      },
-      {
-        role: "user",
-        content: `Context:\n${context}\n\nQuestion:\n${query}`,
-      },
-    ]);
+const response = await llm.invoke([
+  {
+    role: "system",
+    content: `
+You are a helpful assistant answering questions using retrieved documents.
+
+Rules:
+- Use the provided context as your primary source of truth.
+- You MAY paraphrase, summarize, and combine information from multiple context chunks.
+- You MAY rephrase definitions in clearer language.
+- Do NOT introduce facts that are not supported by the context.
+- If the context does not contain enough information to answer the question, say so clearly.
+
+Answer in a clear, concise, and user-friendly manner.
+`,
+  },
+  {
+    role: "user",
+    content: `Context:\n${context}\n\nQuestion:\n${query}`,
+  },
+]);
+
 
     return NextResponse.json({
       answer: response.content,

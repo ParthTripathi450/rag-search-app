@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const navItems = [
   { href: '/', label: 'Search' },
   { href: '/documents', label: 'Documents' },
+  { href: '/scrape', label: 'Scrape Website' }, // ✅ NEW
 ];
 
 export default function Navigation() {
@@ -15,11 +16,11 @@ export default function Navigation() {
     pathname === href || (href !== '/' && pathname.startsWith(href));
 
   return (
-    <nav className="border-b border-gray-200 bg-white">
-      <div className="mx-auto max-w-7xl h-16 px-6 flex items-center justify-between">
+    <nav className="border-b border-border bg-background">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo / Brand */}
-        <div className="flex items-center gap-2 font-semibold text-gray-900">
-          <div className="h-9 w-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg">
+        <div className="flex items-center gap-3 font-semibold text-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground text-lg">
             ✨
           </div>
           RAG Search
@@ -29,6 +30,7 @@ export default function Navigation() {
         <div className="flex items-center gap-8">
           {navItems.map((item) => {
             const active = isActive(item.href);
+
             return (
               <Link
                 key={item.href}
@@ -36,14 +38,16 @@ export default function Navigation() {
                 aria-current={active ? 'page' : undefined}
                 className={`relative text-sm font-medium transition-colors ${
                   active
-                    ? 'text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {item.label}
+
+                {/* Active underline */}
                 <span
-                  className={`absolute -bottom-4 left-0 right-0 h-0.5 ${
-                    active ? 'bg-blue-600' : 'bg-transparent'
+                  className={`absolute -bottom-4 left-0 right-0 h-0.5 transition-colors ${
+                    active ? 'bg-primary' : 'bg-transparent'
                   }`}
                 />
               </Link>
